@@ -1,0 +1,51 @@
+name: Deploy frontend to GitHub Pages
+
+# 프론트엔드(정적 SPA)만 GitHub Pages로 배포한다. 백엔드(FastAPI)는 별도 호스트.
+# 백엔드 주소는 리포 변수 BACKEND_URL 로 주입한다(Settings > Secrets and variables > Actions > Variables).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+        env:
+          # 프로젝트 페이지 하위 경로(/<repo>/) 와 배포된 백엔드 주소를 주입.
+          VITE_BASE: /${{ github.event.repository.name }}/
+          VITE_API_BASE_URL: ${{ vars.BACKEND_URL }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
