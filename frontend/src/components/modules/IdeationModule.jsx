@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { recommendIdeation } from "../../api/client";
 
-// 프로젝트의 진행 예시(슬라임/소셜 디덕션 파티)와 결을 맞춘 기본값.
+// 입력값은 비워두고 예시는 placeholder(회색 힌트)로만 보여준다 — 세계관 필드와 동일한 방식.
 const DEFAULTS = {
   world: "",
-  keywords: "슬라임, 소셜 디덕션, 술래잡기, 시야 제한, 파티",
-  seedGenre: "탑다운 액션 파티 게임",
+  keywords: "",
+  seedGenre: "",
   count: 3,
 };
 
@@ -65,6 +65,7 @@ export default function IdeationModule({ onBuildGdd }) {
             <span className="text-xs font-medium text-slate-500">키워드 (쉼표 구분)</span>
             <input
               value={keywords}
+              placeholder="예: 협동, 생존, 시야 제한, 파티"
               onChange={(e) => setKeywords(e.target.value)}
               className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
             />
@@ -75,6 +76,7 @@ export default function IdeationModule({ onBuildGdd }) {
             </span>
             <input
               value={seedGenre}
+              placeholder="예: 탑다운 액션"
               onChange={(e) => setSeedGenre(e.target.value)}
               className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none"
             />
