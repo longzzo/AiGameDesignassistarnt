@@ -42,7 +42,7 @@ def _via_llm(payload: PromptRequest) -> PromptResponse:
     return PromptResponse(
         prompt=prompt,
         estimated_tokens=estimated_tokens,
-        ai_feedback=f"🟢 [gpt-5] '{payload.genre}' 기준 메타 프롬프트를 생성했습니다(약 {estimated_tokens} 토큰).",
+        ai_feedback=f"🟢 [{llm.model_tag()}] '{payload.genre}' 기준 메타 프롬프트를 생성했습니다(약 {estimated_tokens} 토큰).",
     )
 
 
@@ -77,5 +77,5 @@ def _html_via_llm(payload: PromptRequest) -> HtmlPrototypeResponse:
         raise ValueError("생성된 HTML이 불완전합니다.")
     return HtmlPrototypeResponse(
         html=html,
-        ai_feedback="🟢 [gpt-5] 메커니즘을 반영한 실행 가능한 HTML 프로토타입을 생성했습니다.",
+        ai_feedback=f"🟢 [{llm.model_tag()}] 메커니즘을 반영한 실행 가능한 HTML 프로토타입을 생성했습니다.",
     )

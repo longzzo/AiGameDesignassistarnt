@@ -65,5 +65,5 @@ def _via_llm(payload: IdeationRequest) -> IdeationResponse:
     feedback = data.get("feedback") or f"{len(recs)}개 장르를 추천했습니다."
     return IdeationResponse(
         recommendations=recs,
-        ai_feedback=f"🟢 [gpt-5] {feedback}",
+        ai_feedback=f"🟢 [{llm.model_tag()}] {feedback}",
     )

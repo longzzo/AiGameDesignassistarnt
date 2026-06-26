@@ -165,7 +165,7 @@ def _via_llm(payload: GddRequest) -> GddResponse:
         balance_baseline=baseline,
         markdown=markdown,
         meta_prompt=meta_prompt,
-        ai_feedback=f"🟢 [gpt-5] {feedback}",
+        ai_feedback=f"🟢 [{llm.model_tag()}] {feedback}",
     )
 
 

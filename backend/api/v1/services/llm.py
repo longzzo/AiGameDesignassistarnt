@@ -22,19 +22,49 @@ import os
 from functools import lru_cache
 from typing import Any, Callable
 
+# ── 프로바이더 스위치 ──────────────────────────────────────────────────────
+# .env 의 LLM_PROVIDER 로 전환한다.
+#   github (기본) = GitHub Models (openai/gpt-5, gpt-5-mini) — 배포/품질용
+#   ollama        = 로컬 Ollama (qwen2.5:7b-instruct) — 무제한·오프라인 개발/테스트용
+# Ollama 는 OpenAI 호환 엔드포인트(http://localhost:11434/v1)를 제공하므로 같은
+# openai SDK 로 호출한다. 차이는 (1) api_key 더미, (2) max_tokens 파라미터명,
+# (3) reasoning_effort 미사용 뿐이다.
+_GITHUB_ENDPOINT = "https://models.github.ai/inference"
+_GITHUB_MAIN = "openai/gpt-5"
+_GITHUB_MINI = "openai/gpt-5-mini"
+
+_OLLAMA_ENDPOINT = "http://localhost:11434/v1"
+_OLLAMA_MODEL = "qwen2.5:7b-instruct"  # 로컬은 main/mini 동일 모델 사용
+
+# 하위 호환: 기존에 llm.PROVIDER 를 참조하던 코드용. 표시는 provider_label() 사용 권장.
 PROVIDER = "github-models"
-_DEFAULT_ENDPOINT = "https://models.github.ai/inference"
-_DEFAULT_MAIN = "openai/gpt-5"
-_DEFAULT_MINI = "openai/gpt-5-mini"
 
 # gpt-5는 추론(reasoning) 토큰을 소비하는 모델이라, max_completion_tokens를 너무 낮게 잡으면
 # 추론이 예산을 다 써버려 실제 출력이 빈다(finish_reason=length, content=""). 그래서
 #  (1) reasoning_effort를 낮춰 추론 토큰을 줄이고,
 #  (2) 토큰 한도에 충분한 바닥값을 둔다.
+# (Ollama 모델은 추론 모델이 아니라 이 처리가 불필요 → ollama 분기에서 생략한다.)
 _REASONING_EFFORT = os.getenv("LLM_REASONING_EFFORT", "low")  # minimal | low | medium | high | "" (미전송)
 _MIN_COMPLETION_TOKENS = 3000
 
 _log = logging.getLogger("gamegoal.llm")
+
+
+def _provider() -> str:
+    """현재 LLM 프로바이더('github' | 'ollama'). 기본 github."""
+    p = (os.getenv("LLM_PROVIDER") or "github").strip().lower()
+    return "ollama" if p == "ollama" else "github"
+
+
+def _is_ollama() -> bool:
+    return _provider() == "ollama"
+
+
+def provider_label() -> str:
+    """meta 표시용 사람이 읽는 프로바이더 이름."""
+    if _is_ollama():
+        return f"ollama (local · {_config()['main']})"
+    return "github-models"
 
 
 def _token() -> str | None:
@@ -42,22 +72,43 @@ def _token() -> str | None:
 
 
 def _config() -> dict[str, str | None]:
+    if _is_ollama():
+        # github용 LLM_MODEL_MAIN/MINI 와 섞이지 않게 OLLAMA_MODEL 로 분리.
+        model = os.getenv("OLLAMA_MODEL", _OLLAMA_MODEL)
+        return {
+            "token": "ollama",  # openai SDK가 빈 api_key를 거부하므로 더미값.
+            "endpoint": os.getenv("OLLAMA_ENDPOINT", _OLLAMA_ENDPOINT),
+            "main": model,
+            "mini": model,
+        }
     return {
         "token": _token(),
-        "endpoint": os.getenv("GITHUB_MODELS_ENDPOINT", _DEFAULT_ENDPOINT),
-        "main": os.getenv("LLM_MODEL_MAIN", _DEFAULT_MAIN),
-        "mini": os.getenv("LLM_MODEL_MINI", _DEFAULT_MINI),
+        "endpoint": os.getenv("GITHUB_MODELS_ENDPOINT", _GITHUB_ENDPOINT),
+        "main": os.getenv("LLM_MODEL_MAIN", _GITHUB_MAIN),
+        "mini": os.getenv("LLM_MODEL_MINI", _GITHUB_MINI),
     }
 
 
 def is_enabled() -> bool:
-    """토큰이 있으면 True (실제 호출 가능)."""
+    """AI 호출 가능 설정인지. ollama=로컬 서버 가정으로 항상 True, github=토큰 존재 여부.
+
+    (ollama 서버가 꺼져 있어도 True지만, 실제 호출은 try_ai 가 잡아 'API 호출 불가'로 폴백한다.)
+    """
+    if _is_ollama():
+        return True
     return bool(_token())
 
 
 def model_for(tier: str) -> str:
     c = _config()
     return c["mini"] if tier == "mini" else c["main"]
+
+
+def model_tag(tier: str = "main") -> str:
+    """ai_feedback 라벨용 짧은 모델 이름. 활성 프로바이더의 실제 모델을 반영한다.
+    예: github → 'gpt-5' / 'gpt-5-mini', ollama → 'qwen2.5:7b-instruct'.
+    """
+    return model_for(tier).split("/", 1)[-1]
 
 
 @lru_cache(maxsize=1)
@@ -103,16 +154,23 @@ def _strip_code_fence(text: str) -> str:
 
 
 def _create(messages: list[dict], *, tier: str, max_tokens: int, json_mode: bool, reasoning_effort: str | None = None):
-    effort = reasoning_effort if reasoning_effort is not None else _REASONING_EFFORT
     kwargs: dict[str, Any] = {
         "model": model_for(tier),
         "messages": messages,
+    }
+    if _is_ollama():
+        # Ollama(OpenAI 호환): max_tokens 사용, reasoning_effort 미지원, 추론 바닥값 불필요.
+        kwargs["max_tokens"] = max_tokens
+        # 로컬 소형 모델(qwen 7B 등)은 기본 temperature(~0.8)가 높아 한국어에 다른 언어
+        # 토큰이 섞이고 문장이 깨진다. 낮춰서 일관성·언어 고정을 확보한다.
+        kwargs["temperature"] = float(os.getenv("OLLAMA_TEMPERATURE", "0.3"))
+    else:
         # gpt-5 계열: temperature 미전송(기본값), max_completion_tokens 사용.
         # 추론 토큰이 출력을 굶기지 않도록 충분한 바닥값을 보장한다.
-        "max_completion_tokens": max(max_tokens, _MIN_COMPLETION_TOKENS),
-    }
-    if effort:
-        kwargs["reasoning_effort"] = effort
+        kwargs["max_completion_tokens"] = max(max_tokens, _MIN_COMPLETION_TOKENS)
+        effort = reasoning_effort if reasoning_effort is not None else _REASONING_EFFORT
+        if effort:
+            kwargs["reasoning_effort"] = effort
     if json_mode:
         kwargs["response_format"] = {"type": "json_object"}
     return _client().chat.completions.create(**kwargs)

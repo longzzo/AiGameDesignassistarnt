@@ -30,7 +30,7 @@ export default function App() {
     setFindings((prev) => (prev.includes(note) ? prev : [...prev, note]));
   const meta = MODULES.find((m) => m.id === active);
 
-  // 백엔드의 AI 연결 상태(Azure OpenAI vs 목업) 조회.
+  // 백엔드의 AI 연결 상태(GitHub Models gpt-5 / 로컬 Ollama) 조회.
   const [ai, setAi] = useState(null);
   useEffect(() => {
     getMeta()
@@ -102,8 +102,8 @@ export default function App() {
               <span
                 title={
                   ai.llm_enabled
-                    ? `GitHub Models 연결됨 (main: ${ai.model_main}, mini: ${ai.model_mini})`
-                    : "GitHub 토큰 미설정 — AI 결과는 '현재 API를 호출할 수 없습니다'로 표시됩니다."
+                    ? `${ai.provider} 연결됨 (main: ${ai.model_main}, mini: ${ai.model_mini})`
+                    : "AI 미설정 — AI 결과는 '현재 API를 호출할 수 없습니다'로 표시됩니다."
                 }
                 className={[
                   "shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold sm:px-3",
@@ -113,7 +113,7 @@ export default function App() {
                 ].join(" ")}
               >
                 {ai.llm_enabled ? (
-                  <>🟢<span className="hidden sm:inline"> AI 연결됨</span><span className="hidden lg:inline"> (GitHub Models)</span></>
+                  <>🟢<span className="hidden sm:inline"> AI 연결됨</span><span className="hidden lg:inline"> ({ai.provider?.startsWith("ollama") ? "로컬 Ollama" : "GitHub Models"})</span></>
                 ) : (
                   <>🟡<span className="hidden sm:inline"> API 미연결</span></>
                 )}

@@ -42,5 +42,5 @@ def _via_llm(payload: CoachRequest) -> CoachResponse:
         module=payload.module,
         suggestions=data.get("suggestions", []),
         rationale=data.get("rationale", ""),
-        ai_feedback="🟢 [gpt-5] 시뮬레이션 결과를 분석해 튜닝안을 제시했습니다.",
+        ai_feedback=f"🟢 [{llm.model_tag()}] 시뮬레이션 결과를 분석해 튜닝안을 제시했습니다.",
     )

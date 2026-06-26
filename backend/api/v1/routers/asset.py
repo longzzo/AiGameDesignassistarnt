@@ -57,5 +57,5 @@ def _via_llm(payload: LoreTranslateRequest) -> LoreTranslateResponse:
         lore_applied=world is not None,
         target_languages=payload.target_languages,
         localized=data["localized"],
-        ai_feedback=f"🟢 [gpt-5-mini] {feedback}",
+        ai_feedback=f"🟢 [{llm.model_tag('mini')}] {feedback}",
     )

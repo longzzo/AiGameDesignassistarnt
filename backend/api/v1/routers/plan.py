@@ -246,7 +246,7 @@ def make_plan(payload: PlanRequest) -> PlanResponse:
         capacity_days=round(cap_total, 1),
         ai_feedback=(
             f"{len(payload.features)}개 기능 · {payload.period_weeks}주 · {team_size}명({len(payload.roles)}역할) 기준 "
-            f"WBS {len(wbs)}개 작업을 {'gpt-5가 기능 성격에 맞춰' if tailored else '표준 템플릿으로'} 생성했습니다."
+            f"WBS {len(wbs)}개 작업을 {f'{llm.model_tag()}가 기능 성격에 맞춰' if tailored else '표준 템플릿으로'} 생성했습니다."
         ),
     )
 
@@ -300,5 +300,5 @@ def _feat_via_llm(payload: FeatureGenRequest) -> FeatureGenResponse:
         raise ValueError("기능 목록이 비었습니다.")
     return FeatureGenResponse(
         features=feats,
-        ai_feedback=f"🟢 [gpt-5] 설명 기반으로 기능 {len(feats)}개를 추출했습니다.",
+        ai_feedback=f"🟢 [{llm.model_tag()}] 설명 기반으로 기능 {len(feats)}개를 추출했습니다.",
     )

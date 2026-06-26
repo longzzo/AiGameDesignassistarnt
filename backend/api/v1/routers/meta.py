@@ -13,7 +13,7 @@ def meta() -> dict:
     enabled = llm.is_enabled()
     return {
         "llm_enabled": enabled,
-        "provider": llm.PROVIDER if enabled else None,
+        "provider": llm.provider_label() if enabled else None,
         "mode": "ai" if enabled else "mockup",
         "model_main": llm.model_for("main") if enabled else None,
         "model_mini": llm.model_for("mini") if enabled else None,
