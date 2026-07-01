@@ -160,14 +160,27 @@ export default function IdeationModule({ onBuildGdd }) {
                   ))}
                 </div>
 
+                {/* GDD로 함께 넘길 초안 제안(배경·플랫폼·타겟·수익화) */}
+                {(r.world || r.platform || r.target_audience || r.monetization) && (
+                  <dl className="mt-3 space-y-0.5 border-t border-slate-100 pt-2 text-xs text-slate-500">
+                    {r.world && <div><span className="text-slate-400">🌐 배경</span> {r.world}</div>}
+                    {r.platform && <div><span className="text-slate-400">🖥 플랫폼</span> {r.platform}</div>}
+                    {r.target_audience && <div><span className="text-slate-400">🎯 타겟</span> {r.target_audience}</div>}
+                    {r.monetization && <div><span className="text-slate-400">💰 수익화</span> {r.monetization}</div>}
+                  </dl>
+                )}
+
                 <button
                   type="button"
                   onClick={() =>
                     onBuildGdd?.({
                       genre: r.genre,
-                      world_setting: world.trim() || null,
+                      world_setting: world.trim() || r.world || null,
                       core_mechanics: r.core_features,
                       references: r.reference_games,
+                      platform: r.platform || null,
+                      target_audience: r.target_audience || null,
+                      monetization: r.monetization || null,
                     })
                   }
                   className="mt-4 rounded-md bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-700"

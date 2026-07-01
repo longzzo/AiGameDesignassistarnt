@@ -24,6 +24,9 @@ function initFrom(seed) {
     references: Array.isArray(seed.references)
       ? seed.references.join(", ")
       : DEFAULTS.references,
+    platform: seed.platform ?? DEFAULTS.platform,
+    audience: seed.target_audience ?? DEFAULTS.audience,
+    monetization: seed.monetization ?? DEFAULTS.monetization,
   };
 }
 

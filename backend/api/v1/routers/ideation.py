@@ -32,7 +32,10 @@ def _via_llm(payload: IdeationRequest) -> IdeationResponse:
     system = (
         "당신은 10년 차 수석 게임 기획자입니다. 입력된 세계관/키워드/시드 장르에 어울리는 "
         "게임 장르 후보를 발산형으로 추천합니다. 각 후보는 적합도(0~100), 한 줄 컨셉, 근거, "
-        "매칭 키워드, 핵심 차별화 기능 2~4개, 레퍼런스 게임을 포함합니다."
+        "매칭 키워드, 핵심 차별화 기능 2~4개, 레퍼런스 게임을 포함합니다. "
+        "또한 그 장르로 기획서(GDD) 초안을 바로 작성할 수 있도록 배경/세계관 한 줄(world), "
+        "추천 플랫폼(platform), 타겟 유저(target_audience), 수익화 모델(monetization)도 함께 제안합니다. "
+        "세계관이 입력으로 주어졌다면 world는 그 톤을 따르세요."
     )
     user = (
         json.dumps(
@@ -47,9 +50,10 @@ def _via_llm(payload: IdeationRequest) -> IdeationResponse:
         + f'\n\n정확히 {payload.count}개 후보를 다음 JSON으로만 출력하세요: '
         '{"recommendations": [{"genre": "", "tagline": "", "fit_score": 0, '
         '"rationale": "", "matched_keywords": [], "core_features": [], '
-        '"reference_games": []}], "feedback": ""}'
+        '"reference_games": [], "world": "", "platform": "", '
+        '"target_audience": "", "monetization": ""}], "feedback": ""}'
     )
-    data = llm.chat_json(system, user, tier="main", max_tokens=3000)
+    data = llm.chat_json(system, user, tier="main", max_tokens=3500)
     recs = [
         GenreRecommendation(
             genre=r["genre"],
@@ -59,6 +63,10 @@ def _via_llm(payload: IdeationRequest) -> IdeationResponse:
             matched_keywords=r.get("matched_keywords", []),
             core_features=r.get("core_features", []),
             reference_games=r.get("reference_games", []),
+            world=r.get("world", ""),
+            platform=r.get("platform", ""),
+            target_audience=r.get("target_audience", ""),
+            monetization=r.get("monetization", ""),
         )
         for r in data["recommendations"]
     ]

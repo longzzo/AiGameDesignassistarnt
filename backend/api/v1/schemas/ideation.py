@@ -45,6 +45,11 @@ class GenreRecommendation(BaseModel):
     reference_games: list[str] = Field(
         default_factory=list, description="레퍼런스/유사 게임"
     )
+    # 기획서(GDD) 초안 폼을 함께 채우기 위한 제안 값(선택 — 비어 있을 수 있음).
+    world: str = Field("", description="이 장르에 어울리는 배경/세계관 한 줄")
+    platform: str = Field("", description="추천 플랫폼 (예: PC / 모바일)")
+    target_audience: str = Field("", description="타겟 유저층")
+    monetization: str = Field("", description="추천 수익화 모델")
 
 
 class IdeationResponse(BaseModel):
