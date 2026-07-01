@@ -38,7 +38,7 @@ const genId = () => "n" + Math.random().toString(36).slice(2, 8);
 const toList = (s) => s.split(",").map((x) => x.trim()).filter(Boolean);
 
 export default function LoreModule() {
-  const [entries, setEntries] = usePersistentState("gg_lore_entries", SAMPLE);
+  const [entries, setEntries] = usePersistentState("gg_lore_entries2", []);
   const [world, setWorld] = usePersistentState("gg_lore_world", "");
   const [tab, setTab] = useState("world");
   const [res, setRes] = useState(null);

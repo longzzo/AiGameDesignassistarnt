@@ -12,14 +12,21 @@ function Test-Port($p) { [bool](Get-NetTCPConnection -LocalPort $p -State Listen
 
 Write-Host "=== GameGoal 시작 (루트: $root) ===" -ForegroundColor Cyan
 
-# 1) Ollama (모델은 D드라이브)
+# 1) Ollama — 실행 중이어도 D경로 모델이 안 보이면(C경로로 잘못 켜진 트레이앱) D경로로 재기동.
 $env:OLLAMA_MODELS = "D:\Ollama\models"
 $ollamaExe = "$env:LOCALAPPDATA\Programs\Ollama\ollama.exe"
-if (Get-Process -Name "ollama" -ErrorAction SilentlyContinue) {
-    Write-Host "[1/3] Ollama 이미 실행 중" -ForegroundColor Green
+$ollamaOk = $false
+try {
+    $tags = (Invoke-WebRequest "http://127.0.0.1:11434/api/tags" -TimeoutSec 3 -UseBasicParsing).Content
+    if ($tags -match "qwen2\.5") { $ollamaOk = $true }
+} catch {}
+if ($ollamaOk) {
+    Write-Host "[1/3] Ollama 정상 (D 모델 인식)" -ForegroundColor Green
 } elseif (Test-Path $ollamaExe) {
+    Get-Process -Name "ollama", "ollama app" -ErrorAction SilentlyContinue | Stop-Process -Force
+    Start-Sleep -Seconds 1
     Start-Process $ollamaExe -ArgumentList "serve" -WindowStyle Minimized
-    Write-Host "[1/3] Ollama 시작 (D:\Ollama\models)" -ForegroundColor Green
+    Write-Host "[1/3] Ollama (재)시작 — D:\Ollama\models" -ForegroundColor Green
     Start-Sleep -Seconds 2
 } else {
     Write-Host "[1/3] Ollama 실행파일 못 찾음 — 시작 메뉴에서 수동 실행" -ForegroundColor Yellow
