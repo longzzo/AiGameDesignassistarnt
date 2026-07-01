@@ -38,6 +38,14 @@ export default function App() {
       .catch(() => setAi({ llm_enabled: false, mode: "offline" }));
   }, []);
 
+  // 진행 중인 API 요청 수(client.js가 window 이벤트로 알림) → "처리 중" 배너 표시.
+  const [busy, setBusy] = useState(0);
+  useEffect(() => {
+    const h = (e) => setBusy(e.detail || 0);
+    window.addEventListener("gg-busy", h);
+    return () => window.removeEventListener("gg-busy", h);
+  }, []);
+
   // target 모듈로 이동하면서 payload 를 전달. ts 로 매번 remount → 자동 실행 유도.
   const goTo = (target, payload) => {
     setSeed({ target, payload, ts: Date.now() });
@@ -123,40 +131,52 @@ export default function App() {
         </header>
 
         <div className="min-h-0 flex-1 overflow-auto p-6">
-          {active === "ideation" && (
+          {/* 모든 모듈을 마운트한 채 숨김 처리 → 탭을 바꿔도 입력/결과가 유지됨. */}
+          <Pane show={active === "ideation"}>
             <IdeationModule onBuildGdd={(p) => goTo("gdd", p)} />
-          )}
-          {active === "gdd" && (
+          </Pane>
+          <Pane show={active === "gdd"}>
             <GddModule
               key={keyFor("gdd")}
               seed={seedFor("gdd")}
               findings={findings}
               onValidate={(target, payload) => goTo(target, payload)}
             />
-          )}
-          {active === "stat" && (
+          </Pane>
+          <Pane show={active === "stat"}>
             <StatModule key={keyFor("stat")} seed={seedFor("stat")} onCaptureFinding={addFinding} />
-          )}
-          {active === "economy" && (
-            <EconomyModule
-              key={keyFor("economy")}
-              seed={seedFor("economy")}
-              onCaptureFinding={addFinding}
-            />
-          )}
-          {active === "gacha" && (
+          </Pane>
+          <Pane show={active === "economy"}>
+            <EconomyModule key={keyFor("economy")} seed={seedFor("economy")} onCaptureFinding={addFinding} />
+          </Pane>
+          <Pane show={active === "gacha"}>
             <GachaModule key={keyFor("gacha")} seed={seedFor("gacha")} onCaptureFinding={addFinding} />
-          )}
-          {active === "balance" && <BalanceModule />}
-          {active === "level" && <LevelModule />}
-          {active === "lore" && <LoreModule />}
-          {active === "plan" && <PlanModule />}
-          {active === "asset" && <AssetModule />}
-          {active === "prototype" && <PrototypeModule />}
+          </Pane>
+          <Pane show={active === "balance"}><BalanceModule /></Pane>
+          <Pane show={active === "level"}><LevelModule /></Pane>
+          <Pane show={active === "lore"}><LoreModule /></Pane>
+          <Pane show={active === "plan"}><PlanModule /></Pane>
+          <Pane show={active === "asset"}><AssetModule /></Pane>
+          <Pane show={active === "prototype"}><PrototypeModule /></Pane>
         </div>
       </main>
 
       <ProjectsPanel />
+
+      {/* 진행 중 표시 — API 요청이 있는 동안 떠 있음(로컬 AI는 느려서 작동 여부 확인용). */}
+      {busy > 0 && (
+        <div className="pointer-events-none fixed inset-x-0 bottom-5 z-50 flex justify-center">
+          <div className="flex items-center gap-2.5 rounded-full bg-slate-900/90 px-4 py-2 text-sm font-medium text-white shadow-lg ring-1 ring-white/10">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+            AI 처리 중… <span className="text-slate-300">로컬 모델은 최대 1~2분 걸릴 수 있어요</span>
+          </div>
+        </div>
+      )}
     </div>
   );
+}
+
+// 탭(모듈)을 언마운트하지 않고 숨김 → 다른 탭 갔다 와도 입력/결과가 그대로 유지됨.
+function Pane({ show, children }) {
+  return <div className={show ? "h-full" : "hidden"}>{children}</div>;
 }

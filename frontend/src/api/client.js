@@ -6,15 +6,40 @@ import axios from "axios";
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
 const api = axios.create({
   baseURL: `${API_BASE}/api/v1`,
-  // gpt-5는 추론 때문에 응답이 느릴 수 있어(수십 초) 넉넉히 잡는다. 실패 시 'API 호출 불가'로 폴백.
-  timeout: 120000,
+  // 로컬 ollama(특히 14b)는 호출당 80초+, gpt-5도 수십 초 걸릴 수 있어 넉넉히 잡는다.
+  // (백엔드 LLM 타임아웃 600초보다 약간 길게.) 실패 시 'API 호출 불가'로 폴백.
+  timeout: 660000,
   headers: { "Content-Type": "application/json" },
 });
 
-// 백엔드(FastAPI) 검증/HTTP 오류를 사람이 읽을 수 있는 메시지로 변환.
+// 진행 중인 요청 수를 추적해 window 'gg-busy' 이벤트로 알린다(App의 "처리 중" 배너용).
+// /meta(연결상태 폴링)는 제외 — 사용자가 누른 실제 작업만 카운트.
+let _pending = 0;
+const _emitBusy = () => window.dispatchEvent(new CustomEvent("gg-busy", { detail: _pending }));
+const _counts = (cfg) => cfg && !String(cfg.url || "").includes("/meta");
+
+api.interceptors.request.use((cfg) => {
+  if (_counts(cfg)) {
+    _pending += 1;
+    _emitBusy();
+  }
+  return cfg;
+});
+
+// 응답: 진행 카운트 감소 + 백엔드 검증/HTTP 오류를 사람이 읽을 수 있는 메시지로 변환.
 api.interceptors.response.use(
-  (r) => r,
+  (r) => {
+    if (_counts(r.config)) {
+      _pending = Math.max(0, _pending - 1);
+      _emitBusy();
+    }
+    return r;
+  },
   (error) => {
+    if (_counts(error.config)) {
+      _pending = Math.max(0, _pending - 1);
+      _emitBusy();
+    }
     const detail = error?.response?.data?.detail;
     if (Array.isArray(detail) && detail.length) {
       const first = detail[0];

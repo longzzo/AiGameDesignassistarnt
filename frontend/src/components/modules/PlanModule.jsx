@@ -21,7 +21,7 @@ const DEFAULTS = {
     { role: "아트", count: 1 },
     { role: "QA", count: 1 },
   ],
-  features: "스탯 시뮬레이터\n경제 추적기\n가챠 검증\n에셋 파이프라인",
+  features: "",
   start_date: "",
   desc: "",
 };
@@ -48,7 +48,7 @@ const csvEscape = (v) => {
 };
 
 export default function PlanModule() {
-  const [form, setForm] = usePersistentState("gg_plan_form", DEFAULTS);
+  const [form, setForm] = usePersistentState("gg_plan_form2", DEFAULTS);
   const [res, setRes] = useState(null);
   const [tab, setTab] = useState("wbs");
   const [loading, setLoading] = useState(false);
@@ -154,7 +154,7 @@ export default function PlanModule() {
         <div className="mt-3 flex flex-wrap items-start gap-3">
           <div className="flex flex-1 flex-col gap-1">
             <span className="text-xs font-medium text-slate-500">기능 목록 (한 줄에 하나)</span>
-            <textarea rows={3} value={form.features ?? ""} onChange={(e) => set("features", e.target.value)} className="resize-none rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
+            <textarea rows={3} value={form.features ?? ""} onChange={(e) => set("features", e.target.value)} placeholder={"예: 스탯 시뮬레이터\n경제 추적기\n가챠 검증"} className="resize-none rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
           </div>
           <div className="flex w-72 flex-col gap-1">
             <span className="text-xs font-medium text-slate-500">✨ 설명으로 기능 자동 생성</span>

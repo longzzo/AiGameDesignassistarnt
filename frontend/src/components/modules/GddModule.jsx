@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { generateGdd } from "../../api/client";
 
 const DEFAULTS = {
-  genre: "탑다운 액션 파티 게임",
+  genre: "",
   world: "",
-  mechanics: "슬라임 캐릭터, 소셜 디덕션 기반 술래잡기, 시야 제한",
+  mechanics: "",
   platform: "PC / 모바일",
   audience: "",
   monetization: "",
@@ -79,10 +79,10 @@ export default function GddModule({ seed, onValidate, findings = [] }) {
       {/* 상단: 입력 폼 */}
       <section className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <Field label="장르" value={form.genre} onChange={(v) => set("genre", v)} />
+          <Field label="장르" value={form.genre} onChange={(v) => set("genre", v)} placeholder="예: 탑다운 액션 파티 게임" />
           <Field label="세계관 (Lore) · 선택" value={form.world} onChange={(v) => set("world", v)} placeholder="비우면 톤 추후 확정" />
           <Field label="플랫폼" value={form.platform} onChange={(v) => set("platform", v)} />
-          <Field className="md:col-span-3" label="핵심 메커니즘 (쉼표 구분)" value={form.mechanics} onChange={(v) => set("mechanics", v)} />
+          <Field className="md:col-span-3" label="핵심 메커니즘 (쉼표 구분)" value={form.mechanics} onChange={(v) => set("mechanics", v)} placeholder="예: 슬라임 캐릭터, 술래잡기, 시야 제한" />
           <Field label="타겟 유저 · 선택" value={form.audience} onChange={(v) => set("audience", v)} placeholder="예: 친구와 즐기는 캐주얼" />
           <Field label="수익화 · 선택" value={form.monetization} onChange={(v) => set("monetization", v)} placeholder="예: 부분유료(코스메틱)" />
           <Field label="레퍼런스 · 선택" value={form.references} onChange={(v) => set("references", v)} placeholder="예: Among Us, Fall Guys" />

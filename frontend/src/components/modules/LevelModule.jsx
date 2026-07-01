@@ -22,7 +22,7 @@ const JUMP_COLOR = {
 const DEFAULTS = {
   level_type: "탐험",
   duration_min: 12,
-  mechanics: "이동, 전투, 퍼즐, 은신",
+  mechanics: "",
   curve: "상승",
 };
 const TYPES = ["튜토리얼", "탐험", "보스"];
@@ -37,7 +37,7 @@ const KIND_COLOR = {
 };
 
 export default function LevelModule() {
-  const [form, setForm] = usePersistentState("gg_level_form", DEFAULTS);
+  const [form, setForm] = usePersistentState("gg_level_form2", DEFAULTS);
   const [res, setRes] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -79,7 +79,7 @@ export default function LevelModule() {
           </label>
           <label className="flex min-w-[220px] flex-1 flex-col gap-1">
             <span className="text-xs font-medium text-slate-500">사용 메커니즘 (쉼표)</span>
-            <input value={form.mechanics} onChange={(e) => set("mechanics", e.target.value)} className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
+            <input value={form.mechanics} onChange={(e) => set("mechanics", e.target.value)} placeholder="예: 이동, 전투, 퍼즐, 은신" className="rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
           </label>
           <label className="flex flex-col gap-1">
             <span className="text-xs font-medium text-slate-500">목표 난이도 곡선</span>

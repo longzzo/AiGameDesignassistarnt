@@ -9,7 +9,7 @@ const SAMPLE = {
 
 export default function AssetModule() {
   const [raw, setRaw] = usePersistentState("gg_asset_raw", JSON.stringify(SAMPLE, null, 2));
-  const [world, setWorld] = usePersistentState("gg_asset_world", "멸망 직전의 증기기관 판타지 세계, 비장하고 고풍스러운 어조");
+  const [world, setWorld] = usePersistentState("gg_asset_world2", "");
   const [langs, setLangs] = usePersistentState("gg_asset_langs", "ko, en, ja");
   const [output, setOutput] = useState("");
   const [feedback, setFeedback] = useState("");

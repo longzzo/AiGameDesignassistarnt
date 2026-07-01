@@ -14,8 +14,8 @@ const STACK_OPTIONS = [
 ];
 
 export default function PrototypeModule() {
-  const [genre, setGenre] = useState(DEFAULT_GENRE);
-  const [mechanics, setMechanics] = useState(DEFAULT_MECHANICS);
+  const [genre, setGenre] = useState("");
+  const [mechanics, setMechanics] = useState("");
   const [stack, setStack] = useState(STACK_OPTIONS[0]);
   const [prompt, setPrompt] = useState("");
   const [meta, setMeta] = useState(null);

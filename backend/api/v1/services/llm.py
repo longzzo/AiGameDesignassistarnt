@@ -117,11 +117,15 @@ def _client():
     from openai import OpenAI
 
     c = _config()
+    # ollama(로컬)는 느리지만(특히 14b는 8GB VRAM 초과로 CPU 오프로드 → 호출당 80초+)
+    # 레이트리밋 없이 반드시 완료된다 → 넉넉한 타임아웃(기본 600초, OLLAMA_TIMEOUT로 조정).
+    # github(gpt-5)는 빨리 실패시켜 'API 호출 불가'로 폴백(이중 지연 방지).
+    _timeout = float(os.getenv("OLLAMA_TIMEOUT", "600")) if _is_ollama() else 100.0
     return OpenAI(
         base_url=c["endpoint"],
         api_key=c["token"],
-        timeout=100.0,    # gpt-5는 느림. 단, 재시도는 끄서 느린 호출이 2배로 늘지 않게.
-        max_retries=0,    # 실패 시 즉시 목업 폴백(이중 지연 방지)
+        timeout=_timeout,
+        max_retries=0,
     )
 
 
