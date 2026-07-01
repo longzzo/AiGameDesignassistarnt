@@ -20,3 +20,6 @@ Thumbs.db
 
 # Local agent/IDE state
 .claude/
+
+# 로컬 런처 바이너리 (start-local.ps1로 재빌드 가능 — 공개 레포에 unsigned exe 미포함)
+GameGoal.exe

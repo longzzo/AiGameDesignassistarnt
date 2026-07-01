@@ -10,8 +10,10 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     port: 5173,
-    // 같은 LAN의 다른 기기(예: 집 데스크톱)에서 접속 가능하도록 0.0.0.0 바인딩.
-    host: true,
+    // 같은 LAN/Tailscale의 다른 기기에서 접속 가능하도록 모든 IPv4 인터페이스에 바인딩.
+    host: "0.0.0.0",
+    // 호스트명(예: Tailscale MagicDNS *.ts.net)으로 접속해도 막히지 않게.
+    allowedHosts: true,
     // 백엔드(FastAPI)로의 프록시: 프론트에서 /api 호출 시 8000번으로 전달
     proxy: {
       '/api': {

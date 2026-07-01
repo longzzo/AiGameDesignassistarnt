@@ -10,21 +10,15 @@
 
 ---
 
-## ① 빠른 실행 (한 번에)
+## ① 빠른 실행 (한 번에) — 더블클릭
 
-폴더의 **`start-local.ps1`** 를 우클릭 → **PowerShell에서 실행**.
-또는 PowerShell을 열고:
+폴더의 **`GameGoal.exe`** 를 더블클릭. (경고가 싫으면 **`GameGoal 실행.bat`**)
 
-```powershell
-cd D:\Claude\GameGoal
-./start-local.ps1
-```
+→ Ollama + 백엔드 + 프론트가 자동으로 켜지고(이미 떠 있으면 건너뜀), 준비되면 **브라우저가 자동으로 열립니다**(http://localhost:5173). 끝에 LAN·Tailscale 접속 주소도 출력됩니다. **아무 때나 눌러도 안전**(중복 실행 안 함).
 
-→ Ollama가 켜지고, 백엔드·프론트가 각각 새 창으로 뜹니다.
-→ 잠시 후 브라우저에서 **http://localhost:5173**
-
-> 스크립트가 "실행 정책" 때문에 막히면, PowerShell에서 한 번만:
-> `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` (Y 입력)
+> - `GameGoal.exe` 첫 실행 시 Windows SmartScreen("Windows가 PC를 보호했습니다")이 뜨면 → **추가 정보 → 실행**(한 번만).
+> - 직접 스크립트로 돌리려면: PowerShell에서 `cd D:\Claude\GameGoal; ./start-local.ps1`
+> - 실행 정책 막히면 한 번만: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
 
 ---
 
@@ -60,7 +54,53 @@ npm run dev
 
 > ⚠️ **중요:** 두 기기가 **같은 공유기 = 같은 서브넷**이어야 직접 접속됩니다.
 > 노트북이 `192.168.35.x` / 게이트웨이 `192.168.35.1` 이면, 다른 기기도 `192.168.35.x` + 같은 게이트웨이여야 함.
-> 다르면(예: 한쪽이 `192.168.0.x`) 공유기가 분리된 것 → 같은 WiFi에 붙이거나 Tailscale 사용.
+> 다르면(예: 한쪽이 `192.168.55.x`) 공유기가 분리된 것 → 같은 WiFi에 붙이거나 아래 Tailscale 사용.
+
+### 다른 네트워크일 때 — Tailscale (이미 설정됨)
+
+두 기기가 **다른 공유기/대역**이라도 사설망으로 묶어 접속할 수 있다(외부에서도 가능).
+
+1. 두 기기에 Tailscale 설치 + **같은 계정**으로 로그인 (이미 완료: 노트북·집 PC 모두 `longzzo@`)
+2. 노트북의 Tailscale IP 확인 — PowerShell에서:
+   ```powershell
+   & "C:\Program Files\Tailscale\tailscale.exe" ip -4
+   ```
+   (현재 노트북 = `100.114.32.46`. 이 주소는 잘 안 바뀜)
+3. 집 PC 브라우저에서 → **http://100.114.32.46:5173**
+
+> Tailscale IP는 DHCP처럼 바뀌지 않아 북마크해도 됨. 단, **노트북의 3개 서버가 켜져 있어야** 보인다.
+
+---
+
+## 🔄 노트북을 껐다 켰을 때 — 집 PC에서 다시 접속하기
+
+대부분 자동이라, **노트북에서 딱 하나(`GameGoal.exe` 더블클릭)만** 하면 됩니다.
+
+### 부팅 시 자동으로 켜지는 것 (손댈 필요 없음)
+- **Tailscale** — 자동 시작 · 자동 재연결. 노트북 주소 `100.114.32.46`은 **안 바뀜**.
+- **Ollama** — 트레이 앱 자동 시작(모델은 D드라이브). _(자동이 아니면 `GameGoal.exe`가 알아서 켜줌)_
+
+### 노트북에서 할 일
+1. (선택) 트레이의 **Tailscale 아이콘이 연결됨(초록)** 인지 확인.
+2. **`GameGoal.exe` 더블클릭** → 백엔드·프론트가 켜지고 브라우저가 열림 (10~20초).
+
+> 순서 팁: Tailscale이 부팅 때 먼저 떠 있으므로, **로그인 후** `GameGoal.exe`를 누르면 프론트가 Tailscale 위에 정상 바인딩됩니다.
+
+### 집 PC에서 할 일
+1. 트레이 **Tailscale 아이콘 연결됨(초록)** 확인 (집 PC도 자동 재연결).
+2. 즐겨찾기 → **http://100.114.32.46:5173**
+
+### ✅ 체크리스트 (이게 다 되면 보임)
+- [ ] 노트북: Tailscale 초록
+- [ ] 노트북: `GameGoal.exe` 실행 → 노트북에서 http://localhost:5173 먼저 열림
+- [ ] 집 PC: Tailscale 초록
+- [ ] 집 PC: http://100.114.32.46:5173 접속
+
+### 집 PC에서 안 열릴 때 (순서대로)
+1. **노트북에서 먼저** http://localhost:5173 가 열리나? 안 열리면 → `GameGoal.exe` 다시 실행.
+2. 양쪽 **Tailscale이 초록**인지 (둘 다 같은 계정 `longzzo@`).
+3. 그래도 안 되면 노트북에서 **`GameGoal.exe`를 한 번 더 실행** (프론트를 Tailscale 연결 후 다시 바인딩 — 이게 가장 흔한 해결).
+4. "현재 API를 호출할 수 없습니다"만 뜨면 AI(Ollama) 문제 → 아래 ⑥ 문제 해결 참고.
 
 ---
 
