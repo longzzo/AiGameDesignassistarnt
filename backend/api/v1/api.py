@@ -12,6 +12,7 @@ from api.v1.routers import (
     gdd,
     ideation,
     level,
+    loop,
     lore,
     meta,
     plan,
@@ -33,3 +34,4 @@ api_router.include_router(level.router)
 api_router.include_router(lore.router)
 api_router.include_router(plan.router)
 api_router.include_router(balance.router)
+api_router.include_router(loop.router)

@@ -165,7 +165,7 @@ export default function App() {
         </div>
       </main>
 
-      <ProjectsPanel />
+      <ProjectsPanel moduleId={active} />
 
       {/* 진행 중 표시 — API 요청이 있는 동안 떠 있음(로컬 AI는 느려서 작동 여부 확인용). */}
       {busy > 0 && (

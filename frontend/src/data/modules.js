@@ -62,9 +62,9 @@ export const MODULES = [
   },
   {
     id: "loop",
-    label: "코어 루프",
+    label: "코어 루프 계산기",
     icon: "🔁",
-    desc: "전투·전리품·강화 실시간 밸런싱",
+    desc: "자원·수익원·강화 자유 조립 시뮬",
   },
   {
     id: "asset",

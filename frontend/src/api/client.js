@@ -95,6 +95,9 @@ export const makePlan = (payload) =>
 export const genFeatures = (payload) =>
   api.post("/plan/features", payload).then((r) => r.data);
 
+export const designLoop = (payload) =>
+  api.post("/loop/design", payload).then((r) => r.data);
+
 export const compareBuilds = (payload) =>
   api.post("/balance/compare", payload).then((r) => r.data);
 

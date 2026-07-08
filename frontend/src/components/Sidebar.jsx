@@ -50,8 +50,8 @@ export default function Sidebar({ active, onSelect }) {
         })}
       </nav>
 
-      {/* 가이드 패널과 푸터는 좁은 화면(아이콘 모드)에서는 숨김 */}
-      <div className="hidden md:block">
+      {/* 가이드는 우측 패널(📖 탭)로 이동 — 우측 패널이 없는 md~lg 구간에서만 폴백 표시 */}
+      <div className="hidden md:block lg:hidden">
         <GuidePanel moduleId={active} />
       </div>
       <div className="hidden border-t border-slate-800 px-5 py-3 text-[11px] text-slate-600 md:block">
