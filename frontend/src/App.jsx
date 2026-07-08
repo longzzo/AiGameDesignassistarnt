@@ -19,6 +19,8 @@ import GachaModule from "./components/modules/GachaModule";
 import BalanceModule from "./components/modules/BalanceModule";
 import AssetModule from "./components/modules/AssetModule";
 import PrototypeModule from "./components/modules/PrototypeModule";
+import MapModule from "./components/modules/MapModule";
+import LoopModule from "./components/modules/LoopModule";
 
 export default function App() {
   const [active, setActive] = useState("ideation");
@@ -153,7 +155,9 @@ export default function App() {
             <GachaModule key={keyFor("gacha")} seed={seedFor("gacha")} onCaptureFinding={addFinding} />
           </Pane>
           <Pane show={active === "balance"}><BalanceModule /></Pane>
+          <Pane show={active === "loop"}><LoopModule /></Pane>
           <Pane show={active === "level"}><LevelModule /></Pane>
+          <Pane show={active === "map"}><MapModule /></Pane>
           <Pane show={active === "lore"}><LoreModule /></Pane>
           <Pane show={active === "plan"}><PlanModule /></Pane>
           <Pane show={active === "asset"}><AssetModule /></Pane>

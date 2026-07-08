@@ -19,6 +19,12 @@ export const MODULES = [
     desc: "비트·페이싱·인카운터 설계",
   },
   {
+    id: "map",
+    label: "맵 제작기",
+    icon: "⛰️",
+    desc: "3D 맵 생성 · 방/지형 편집",
+  },
+  {
     id: "lore",
     label: "월드 바이블 검증",
     icon: "📖",
@@ -53,6 +59,12 @@ export const MODULES = [
     label: "밸런스 랩",
     icon: "🎯",
     desc: "목표 역산 · 빌드 비교",
+  },
+  {
+    id: "loop",
+    label: "코어 루프",
+    icon: "🔁",
+    desc: "전투·전리품·강화 실시간 밸런싱",
   },
   {
     id: "asset",
